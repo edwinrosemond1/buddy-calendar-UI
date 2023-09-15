@@ -56,16 +56,6 @@ const CalendarComponent: React.FC = () => {
   return (
     <div className="app-container">
       {/* Header */}
-      <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6" style={{ flexGrow: 1 }}>
-            Buddy Calendar
-          </Typography>
-          <IconButton edge="end" color="inherit">
-            <AccountCircle />
-          </IconButton>
-        </Toolbar>
-      </AppBar>
 
       <div className="main-content">
         {/* Sidebar */}
