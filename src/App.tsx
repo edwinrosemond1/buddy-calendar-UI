@@ -1,45 +1,40 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useContext } from "react";
 import "./App.css";
-import axios from "axios";
 import CalendarComponent from "./components/Calendar/index";
 import Modal from "react-modal";
 import Login from "./components/Login";
 import SignUp from "./components/SignUp"; // Remember to import the SignUp component.
 import { AppHeader } from "./components/Header";
+import CircularProgress from "@mui/material/CircularProgress";
+import UserContext from "./contexts/UserContext";
 
 Modal.setAppElement("#root");
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showSignUp, setShowSignUp] = useState(false);
 
-  useEffect(() => {
-    const token = localStorage.getItem("jwt");
-    if (token) {
-      // Optionally: validate the token with the backend to ensure it's still valid.
-      setIsAuthenticated(true);
-    }
-  }, []);
-
-  // useEffect(() => {
-  //   // Check if user is authenticated on initial load
-  //   axios.get("/is-authenticated").then((response) => {
-  //     if (response.data.isAuthenticated) {
-  //       setIsAuthenticated(true);
-  //     }
-  //   });
-  // }, []);
+  const { user, loading, setLoading } = useContext(UserContext);
 
   const handleSignUpSuccess = () => {
-    setShowSignUp(false); // Hide the SignUp component
-    // You can add any other logic here if needed after a successful sign-up.
+    setShowSignUp(false);
   };
 
   return (
     <>
-      <AppHeader setIsAuthenticated={setIsAuthenticated} />
+      <AppHeader setIsLoading={setLoading} />
 
-      {isAuthenticated ? (
+      {loading ? (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100vh",
+          }}
+        >
+          <CircularProgress />
+        </div>
+      ) : user ? (
         <CalendarComponent />
       ) : showSignUp ? (
         <SignUp
@@ -47,10 +42,7 @@ function App() {
           onSignUpSuccess={handleSignUpSuccess}
         />
       ) : (
-        <Login
-          setShowSignUp={setShowSignUp}
-          onLoginSuccess={() => setIsAuthenticated(true)}
-        />
+        <Login setIsLoading={setLoading} setShowSignUp={setShowSignUp} />
       )}
     </>
   );

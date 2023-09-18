@@ -1,37 +1,33 @@
 import React, { useState } from "react";
 import { Button, TextField } from "@material-ui/core";
 import Link from "@mui/material/Link";
-import axios from "axios"; // Assuming you have axios installed.
+// Assuming you've set this up as shown earlier.
 import "./component.css";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../firebase-config";
 
 interface LoginProps {
-  onLoginSuccess: () => void;
   setShowSignUp: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const Login: React.FC<LoginProps> = ({ onLoginSuccess, setShowSignUp }) => {
-  const [username, setUsername] = useState("");
+const Login: React.FC<LoginProps> = ({ setShowSignUp, setIsLoading }) => {
+  const [email, setEmail] = useState(""); // Changed from username to email for Firebase email/password auth.
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null); // Error state for handling invalid credentials or server issues.
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      const response = await axios.post("YOUR_BACKEND_ENDPOINT_HERE/login", {
-        username,
-        password,
-      });
-      const { token } = response.data;
-
-      if (token) {
-        localStorage.setItem("jwt", token);
-        onLoginSuccess(); // If login was successful, call the onLoginSuccess function.
-      } else {
-        setError("Invalid credentials or server error.");
-      }
-    } catch (err) {
-      setError("Invalid credentials or server error.");
-    }
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed in
+        console.log("user", userCredential);
+      })
+      .catch((error) => {
+        const errorMessage = error.message;
+        setError(errorMessage);
+      })
+      .finally(() => console.log("finally"));
   };
 
   return (
@@ -41,13 +37,13 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess, setShowSignUp }) => {
         {error && <p style={{ color: "red" }}>{error}</p>}
         <form onSubmit={handleSubmit}>
           <TextField
-            id="outlined-username-input"
-            label="Username"
-            type="text"
+            id="outlined-email-input"
+            label="Email" // Changed from Username to Email.
+            type="email" // Changed type to email.
             variant="outlined"
             fullWidth
             className="inputSpacing"
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) => setEmail(e.target.value)}
           />
 
           <TextField

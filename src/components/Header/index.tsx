@@ -7,14 +7,16 @@ import {
   MenuItem,
 } from "@material-ui/core";
 import { AccountCircle } from "@material-ui/icons";
-import React from "react";
+import React, { useEffect, createContext } from "react";
 import { useState } from "react";
+import { signOut } from "firebase/auth";
+import { auth } from "../../firebase-config";
 
 interface AppHeaderProps {
-  setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const AppHeader: React.FC<AppHeaderProps> = ({ setIsAuthenticated }) => {
+export const AppHeader: React.FC<AppHeaderProps> = ({ setIsLoading }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -25,12 +27,28 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ setIsAuthenticated }) => {
     setAnchorEl(null);
   };
 
-  const handleLogout = () => {
-    // Insert your logout logic here
-    localStorage.removeItem("jwt");
-    setIsAuthenticated(false);
+  const handleLogout = async () => {
+    await signOut(auth);
     handleClose();
   };
+
+  // useEffect(() => {
+  //   setIsLoading(true); // Set loading to true initially
+
+  //   const unsubscribe = onAuthStateChanged(auth, (user) => {
+  //     if (user) {
+  //       setIsAuthenticated(true);
+  //       console.log("User is signed in:", user);
+  //     } else {
+  //       setIsAuthenticated(false);
+  //       console.log("User is signed out.");
+  //     }
+
+  //     setIsLoading(false); // Set loading to false after authentication check is done
+  //   });
+
+  //   return () => unsubscribe(); // This ensures the observer is removed when the component is unmounted
+  // }, [setIsAuthenticated, setIsLoading]);
 
   return (
     <AppBar position="static">

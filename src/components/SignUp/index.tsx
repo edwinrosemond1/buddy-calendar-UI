@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import { Button, TextField } from "@material-ui/core";
-import axios from "axios";
-// import "./component.css";
 import Link from "@mui/material/Link";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../firebase-config";
 
 interface SignupProps {
   onSignUpSuccess: () => void;
   setShowSignUp: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const Signup: React.FC<SignupProps> = ({ onSignUpSuccess, setShowSignUp }) => {
+const Signup: React.FC<SignupProps> = ({ setShowSignUp }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -21,25 +21,19 @@ const Signup: React.FC<SignupProps> = ({ onSignUpSuccess, setShowSignUp }) => {
       setError("Passwords do not match.");
       return;
     }
-    const URL =
-      "http://127.0.0.1:5001/calendar-buddy-bfdf1/us-central1/signup-signup";
     try {
-      const response = await axios.post(URL, {
-        username,
-        password,
-      });
-      console.log(response);
-      const token = response.data.uid;
-
-      if (token) {
-        console.log("setting local storage");
-        localStorage.setItem("jwt", token);
-        onSignUpSuccess();
-      } else {
-        setError("Error during sign up or server error.");
-      }
+      createUserWithEmailAndPassword(auth, username, password)
+        .then((userCredential) => {
+          // Signed in
+          console.log("user", userCredential);
+        })
+        .catch((error) => {
+          const errorMessage = error.message;
+          setError(errorMessage);
+        })
+        .finally(() => console.log("finally"));
     } catch (err) {
-      setError("Error during sign up or server error.");
+      console.log("error");
     }
   };
 
@@ -52,7 +46,7 @@ const Signup: React.FC<SignupProps> = ({ onSignUpSuccess, setShowSignUp }) => {
       <form onSubmit={handleSubmit}>
         <TextField
           id="signup-username-input"
-          label="Username"
+          label="Email"
           type="text"
           variant="outlined"
           fullWidth

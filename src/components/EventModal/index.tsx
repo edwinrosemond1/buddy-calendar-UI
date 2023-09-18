@@ -5,7 +5,10 @@ import "./component.css";
 import Button from "@mui/material/Button";
 import { TextField, Grid, Divider } from "@mui/material";
 import { CalendarEvent } from "../Calendar";
+import { v4 as uuidv4 } from "uuid";
 
+const CURRENT_USER = "edwin";
+export type Mode = "view" | "add";
 interface EventModalProps {
   isOpen: boolean;
   onRequestClose: () => void;
@@ -13,6 +16,8 @@ interface EventModalProps {
   formData: CalendarEvent;
   setFormData: React.Dispatch<React.SetStateAction<CalendarEvent>>;
   setModalOpen: (value: React.SetStateAction<boolean>) => void;
+  mode: Mode;
+  setMode: React.Dispatch<React.SetStateAction<Mode>>;
 }
 
 const EventModal: React.FC<EventModalProps> = ({
@@ -22,11 +27,12 @@ const EventModal: React.FC<EventModalProps> = ({
   formData,
   setFormData,
   setModalOpen,
+  mode,
+  setMode,
 }) => {
-  console.log("loading modal", isOpen);
-
-  const handleSubmit = () => {
-    onSubmit(formData);
+  const handleSubmit = async () => {
+    const id = uuidv4();
+    onSubmit({ ...formData, id });
     onRequestClose();
   };
 
@@ -48,7 +54,18 @@ const EventModal: React.FC<EventModalProps> = ({
         },
       }}
     >
-      <h2>Add Event</h2>
+      <h2 className="modal-header">
+        {mode === "add" ? "Add Event" : "Event Details"}
+        {mode === "view" && (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => setMode("add")}
+          >
+            Edit
+          </Button>
+        )}
+      </h2>
       <Divider style={{ marginBottom: "15px", marginTop: "10px" }} />
 
       <Grid container direction="column" spacing={3}>
@@ -56,10 +73,13 @@ const EventModal: React.FC<EventModalProps> = ({
         {/* Adjusted spacing */}
         <Grid item>
           <TextField
+            sx={{ width: 300 }}
             id="outlined-basic-title"
             label="Title"
             variant="outlined"
             fullWidth
+            value={formData.title}
+            disabled={mode === "view"}
             onChange={(e) =>
               setFormData({ ...formData, title: e.target.value })
             }
@@ -67,10 +87,11 @@ const EventModal: React.FC<EventModalProps> = ({
         </Grid>
         <Grid item>
           <TextField
-            sx={{ width: 300 }}
             id="outlined-basic-description"
             label="Description"
             variant="outlined"
+            value={formData.description}
+            disabled={mode === "view"}
             fullWidth
             onChange={(e) =>
               setFormData({ ...formData, description: e.target.value })
@@ -83,6 +104,7 @@ const EventModal: React.FC<EventModalProps> = ({
             className="input-field"
             type="datetime-local"
             value={moment(formData.start).format("YYYY-MM-DDTHH:mm")}
+            disabled={mode === "view"}
             onChange={(e) =>
               setFormData({ ...formData, start: new Date(e.target.value) })
             }
@@ -94,6 +116,7 @@ const EventModal: React.FC<EventModalProps> = ({
             className="input-field"
             type="datetime-local"
             value={moment(formData.end).format("YYYY-MM-DDTHH:mm")}
+            disabled={mode === "view"}
             onChange={(e) =>
               setFormData({ ...formData, end: new Date(e.target.value) })
             }

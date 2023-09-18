@@ -63,3 +63,9 @@ body.ReactModal__Body--open .ReactModal__Overlay .ReactModal__Content {
 .submit-button:hover {
   background-color: #3498db;
 }
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
