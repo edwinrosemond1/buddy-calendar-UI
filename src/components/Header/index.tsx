@@ -5,9 +5,9 @@ import {
   IconButton,
   Menu,
   MenuItem,
-} from "@material-ui/core";
-import { AccountCircle } from "@material-ui/icons";
-import React, { useEffect, createContext } from "react";
+} from "@mui/material";
+import { AccountCircle } from "@mui/icons-material";
+import React from "react";
 import { useState } from "react";
 import { signOut } from "firebase/auth";
 import { auth } from "../../firebase-config";

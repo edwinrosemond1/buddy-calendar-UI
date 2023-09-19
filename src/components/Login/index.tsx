@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { Button, TextField } from "@material-ui/core";
+import { Button, TextField } from "@mui/material";
 import Link from "@mui/material/Link";
-// Assuming you've set this up as shown earlier.
 import "./component.css";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../firebase-config";
