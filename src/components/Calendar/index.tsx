@@ -23,9 +23,9 @@ const CalendarComponent: React.FC = () => {
   const [modalMode, setModalMode] = useState<Mode>("add");
   const [isModalOpen, setModalOpen] = useState(false);
   const [formData, setFormData] = useState<CalendarEvent>({} as CalendarEvent);
+  const [eventSubmitted, setEventSubmitted] = useState(false);
 
   useEffect(() => {
-    console.log("rerender calendar");
     axios.get(config.apis.EVENT_LIST).then((response) => {
       console.log("list events", response);
       if (response.data) {
@@ -37,9 +37,10 @@ const CalendarComponent: React.FC = () => {
         setEvents([...transformedEvents]);
       }
     });
-  }, [isModalOpen]);
+  }, [eventSubmitted]);
 
   const handleSlotSelection = (slotInfo: any) => {
+    setEventSubmitted(false);
     setFormData({
       ...formData,
       start: slotInfo.start, // set the selected date as start date
@@ -58,6 +59,7 @@ const CalendarComponent: React.FC = () => {
       console.log("error persisting event", err);
     }
     setModalOpen(false);
+    setEventSubmitted(true);
   };
 
   const handleEventClick = (event: CalendarEvent) => {
