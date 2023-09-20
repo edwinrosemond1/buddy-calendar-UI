@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext } from "react";
 import Modal from "react-modal";
 import moment from "moment";
 import "./component.css";
@@ -6,9 +6,10 @@ import Button from "@mui/material/Button";
 import { TextField, Grid, Divider } from "@mui/material";
 import { CalendarEvent } from "../Calendar";
 import { v4 as uuidv4 } from "uuid";
+import UserContext from "../../contexts/UserContext";
 
-const CURRENT_USER = "edwin";
 export type Mode = "view" | "add";
+
 interface EventModalProps {
   isOpen: boolean;
   onRequestClose: () => void;
@@ -30,9 +31,11 @@ const EventModal: React.FC<EventModalProps> = ({
   mode,
   setMode,
 }) => {
+  const { user } = useContext(UserContext);
+
   const handleSubmit = async () => {
     const id = uuidv4();
-    onSubmit({ ...formData, id });
+    onSubmit({ ...formData, id, author: user?.email as string });
     onRequestClose();
   };
 
@@ -56,7 +59,7 @@ const EventModal: React.FC<EventModalProps> = ({
     >
       <h2 className="modal-header">
         {mode === "add" ? "Add Event" : "Event Details"}
-        {mode === "view" && (
+        {mode === "view" && user?.email === formData.author && (
           <Button
             variant="contained"
             color="primary"

@@ -14,7 +14,7 @@ export interface CalendarEvent extends Event {
   description?: string; // If you want to add description as an optional property
   start: Date;
   end: Date;
-  author?: string;
+  author: string;
   id: string;
 }
 
