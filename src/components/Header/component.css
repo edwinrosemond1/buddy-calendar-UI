@@ -1,0 +1,9 @@
+.account-user {
+  margin-right: 16px;
+  font-size: medium;
+  white-space: nowrap;
+}
+
+.profile-menu .MuiMenu-paper {
+  min-width: fit-content;
+}

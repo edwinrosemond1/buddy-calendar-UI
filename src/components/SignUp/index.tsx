@@ -1,19 +1,31 @@
 import React, { useState } from "react";
 import { Button, TextField } from "@mui/material";
-import Link from "@mui/material/Link";
+import { Link } from "react-router-dom";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../firebase-config";
+import { auth, firestore } from "../../firebase-config";
+import { setDoc, doc } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
 
 interface SignupProps {
-  onSignUpSuccess: () => void;
-  setShowSignUp: React.Dispatch<React.SetStateAction<boolean>>;
+  // onSignUpSuccess: () => void;
+  // setShowSignUp: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const Signup: React.FC<SignupProps> = ({ setShowSignUp }) => {
+const generateRandomColor = () => {
+  const letters = "0123456789ABCDEF";
+  let color = "#";
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+};
+
+const Signup: React.FC<SignupProps> = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,9 +35,13 @@ const Signup: React.FC<SignupProps> = ({ setShowSignUp }) => {
     }
     try {
       createUserWithEmailAndPassword(auth, username, password)
-        .then((userCredential) => {
-          // Signed in
+        .then(async (userCredential) => {
+          const color = generateRandomColor();
+          const userRef = doc(firestore, "users", userCredential.user.uid); // assuming your collection is named 'users'
+          await setDoc(userRef, { color });
+          navigate("/");
           console.log("user", userCredential);
+          // Signed in
         })
         .catch((error) => {
           const errorMessage = error.message;
@@ -84,14 +100,7 @@ const Signup: React.FC<SignupProps> = ({ setShowSignUp }) => {
           Sign Up
         </Button>
       </form>
-      <Link
-        component="button"
-        className="signup"
-        variant="h6"
-        onClick={() => {
-          setShowSignUp(false);
-        }}
-      >
+      <Link className="signup" to="/login">
         Already have an account? Login
       </Link>
     </div>

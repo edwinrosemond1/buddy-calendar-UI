@@ -1,7 +1,7 @@
-// firebaseConfig.js
-
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
+import { getDatabase } from "firebase/database";
+import { getFirestore } from "firebase/firestore"; // Import necessary Firestore methods
 
 const config = {
   apiKey: "AIzaSyAey-qPSicrLoZRBWglMd8N8QmtmiQL8Fg",
@@ -12,5 +12,7 @@ const config = {
   appId: "YOUR_APP_ID",
 };
 
-const app = initializeApp(config);
+export const app = initializeApp(config);
+export const database = getDatabase(app); // Exporting Realtime Database
 export const auth = getAuth(app);
+export const firestore = getFirestore(app); // Initialize and export Firestore

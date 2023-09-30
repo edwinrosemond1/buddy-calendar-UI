@@ -1,25 +1,28 @@
 import React, { useState } from "react";
 import { Button, TextField } from "@mui/material";
-import Link from "@mui/material/Link";
+import { Link } from "react-router-dom";
 import "./component.css";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../firebase-config";
+import { useNavigate } from "react-router-dom";
 
 interface LoginProps {
-  setShowSignUp: React.Dispatch<React.SetStateAction<boolean>>;
+  // setShowSignUp: React.Dispatch<React.SetStateAction<boolean>>;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const Login: React.FC<LoginProps> = ({ setShowSignUp, setIsLoading }) => {
+const Login: React.FC<LoginProps> = ({ setIsLoading }) => {
   const [email, setEmail] = useState(""); // Changed from username to email for Firebase email/password auth.
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         // Signed in
+        navigate("/");
         console.log("user", userCredential);
       })
       .catch((error) => {
@@ -65,14 +68,7 @@ const Login: React.FC<LoginProps> = ({ setShowSignUp, setIsLoading }) => {
             Login
           </Button>
         </form>
-        <Link
-          component="button"
-          className="signup"
-          variant="h6"
-          onClick={() => {
-            setShowSignUp(true);
-          }}
-        >
+        <Link className="signup" to="/signup">
           Sign Up
         </Link>
       </div>

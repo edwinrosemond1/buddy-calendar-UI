@@ -1,26 +1,28 @@
-import React, { useState, useContext } from "react";
+import React, { useContext } from "react";
 import "./App.css";
-import CalendarComponent from "./components/Calendar/index";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from "react-router-dom";
 import Modal from "react-modal";
 import Login from "./components/Login";
-import SignUp from "./components/SignUp"; // Remember to import the SignUp component.
+import SignUp from "./components/SignUp";
 import { AppHeader } from "./components/Header";
 import CircularProgress from "@mui/material/CircularProgress";
 import UserContext from "./contexts/UserContext";
+import { HomePage } from "./components/GroupPage";
+import CalendarComponent from "./components/Calendar/index";
 
 Modal.setAppElement("#root");
 
 function App() {
-  const [showSignUp, setShowSignUp] = useState(false);
-
   const { user, loading, setLoading } = useContext(UserContext);
-
-  const handleSignUpSuccess = () => {
-    setShowSignUp(false);
-  };
+  console.log("user value is now", user);
 
   return (
-    <>
+    <Router>
       <AppHeader setIsLoading={setLoading} />
 
       {loading ? (
@@ -34,17 +36,20 @@ function App() {
         >
           <CircularProgress />
         </div>
-      ) : user ? (
-        <CalendarComponent />
-      ) : showSignUp ? (
-        <SignUp
-          setShowSignUp={setShowSignUp}
-          onSignUpSuccess={handleSignUpSuccess}
-        />
       ) : (
-        <Login setIsLoading={setLoading} setShowSignUp={setShowSignUp} />
+        <Routes>
+          <Route
+            path="/"
+            element={user ? <HomePage /> : <Navigate replace to="/login" />}
+          />
+          <Route path="/signup" element={<SignUp />} />
+
+          <Route path="/login" element={<Login setIsLoading={setLoading} />} />
+
+          <Route path="/calendar" element={<CalendarComponent />} />
+        </Routes>
       )}
-    </>
+    </Router>
   );
 }
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Calendar, momentLocalizer, Event } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
@@ -6,6 +6,11 @@ import "./component.css";
 import EventModal, { Mode } from "../EventModal/index";
 import axios from "axios";
 import { config } from "../../constants";
+import { SideBar } from "../SideBar";
+import { useLocation } from "react-router-dom";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { firestore } from "../../firebase-config";
+import UserContext from "../../contexts/UserContext";
 
 const localizer = momentLocalizer(moment);
 
@@ -18,25 +23,42 @@ export interface CalendarEvent extends Event {
   id: string;
 }
 
-const CalendarComponent: React.FC = () => {
+interface CalendarProps {}
+
+const CalendarComponent: React.FC<CalendarProps> = ({}) => {
+  const groupId = useLocation().state?.groupId;
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [modalMode, setModalMode] = useState<Mode>("add");
   const [isModalOpen, setModalOpen] = useState(false);
   const [formData, setFormData] = useState<CalendarEvent>({} as CalendarEvent);
   const [eventSubmitted, setEventSubmitted] = useState(false);
 
+  const { user } = useContext(UserContext);
+  const groupsRef = collection(firestore, "events"); // Reference to 'groups' collection
+
   useEffect(() => {
-    axios.get(config.apis.EVENT_LIST).then((response) => {
-      console.log("list events", response);
-      if (response.data) {
-        const transformedEvents = response.data.map((event: CalendarEvent) => ({
-          ...event,
-          start: new Date(event.start),
-          end: new Date(event.end),
-        }));
-        setEvents([...transformedEvents]);
-      }
-    });
+    // axios.get(config.apis.EVENT_LIST).then((response) => {
+    //   console.log("list events", response);
+    //   if (response.data) {
+    //     const transformedEvents = response.data.map((event: CalendarEvent) => ({
+    //       ...event,
+    //       start: new Date(event.start),
+    //       end: new Date(event.end),
+    //     }));
+    //     setEvents([...transformedEvents]);
+    //   }
+    // });
+    const getEvents = async () => {
+      let eventsToSet = [];
+      const groupQuery = query(groupsRef, where("groupId", "==", groupId));
+      const querySnapshot = await getDocs(groupQuery);
+      querySnapshot.forEach((event) => {
+        console.log(event.data());
+        eventsToSet.push({
+          name: event.data().name,
+        });
+      });
+    };
   }, [eventSubmitted]);
 
   const handleSlotSelection = (slotInfo: any) => {
@@ -45,6 +67,8 @@ const CalendarComponent: React.FC = () => {
       ...formData,
       start: slotInfo.start, // set the selected date as start date
       end: slotInfo.end,
+      groupId,
+      author: user?.email,
     } as CalendarEvent);
     setModalMode("add");
     setModalOpen(true);
@@ -75,8 +99,9 @@ const CalendarComponent: React.FC = () => {
 
       <div className="main-content">
         {/* Sidebar */}
-        <div className="sidebar">My Sidebar Content</div>
-
+        <div className="sidebar">
+          <SideBar />
+        </div>
         {/* Calendar */}
         <div className="calendar-container">
           <Calendar

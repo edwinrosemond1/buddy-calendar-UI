@@ -7,10 +7,14 @@ import {
   MenuItem,
 } from "@mui/material";
 import { AccountCircle } from "@mui/icons-material";
-import React from "react";
+import React, { useContext } from "react";
 import { useState } from "react";
 import { signOut } from "firebase/auth";
 import { auth } from "../../firebase-config";
+import UserContext from "../../contexts/UserContext";
+import "./component.css";
+import { useNavigate } from "react-router-dom";
+import { ButtonBase } from "@mui/material";
 
 interface AppHeaderProps {
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -18,7 +22,8 @@ interface AppHeaderProps {
 
 export const AppHeader: React.FC<AppHeaderProps> = ({ setIsLoading }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-
+  const { user } = useContext(UserContext);
+  const navigate = useNavigate();
   const handleOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -32,34 +37,31 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ setIsLoading }) => {
     handleClose();
   };
 
-  // useEffect(() => {
-  //   setIsLoading(true); // Set loading to true initially
-
-  //   const unsubscribe = onAuthStateChanged(auth, (user) => {
-  //     if (user) {
-  //       setIsAuthenticated(true);
-  //       console.log("User is signed in:", user);
-  //     } else {
-  //       setIsAuthenticated(false);
-  //       console.log("User is signed out.");
-  //     }
-
-  //     setIsLoading(false); // Set loading to false after authentication check is done
-  //   });
-
-  //   return () => unsubscribe(); // This ensures the observer is removed when the component is unmounted
-  // }, [setIsAuthenticated, setIsLoading]);
-
   return (
     <AppBar position="static">
       <Toolbar>
-        <Typography variant="h6" style={{ flexGrow: 1 }}>
-          Buddy Calendar
-        </Typography>
-        <IconButton edge="end" color="inherit" onClick={handleOpen}>
-          <AccountCircle />
-        </IconButton>
+        <ButtonBase onClick={() => navigate("/")}>
+          <Typography variant="h6">Buddy Calendar</Typography>
+        </ButtonBase>
+        <div style={{ flexGrow: 1 }}></div>{" "}
+        {/* This empty div will take up all available space, pushing your icon to the right */}
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <div
+            style={{
+              width: "24px",
+              height: "24px",
+              borderRadius: "50%",
+              backgroundColor: user?.color,
+              marginRight: "8px", // Adjust the margin as needed
+            }}
+          ></div>
+          <IconButton edge="end" color="inherit" onClick={handleOpen}>
+            <div className="account-user">{user?.email}</div>
+            <AccountCircle />
+          </IconButton>
+        </div>
         <Menu
+          className="profile-menu"
           anchorEl={anchorEl}
           keepMounted
           open={Boolean(anchorEl)}

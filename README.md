@@ -48,3 +48,16 @@ You can learn more in the [Create React App documentation](https://facebook.gith
 To learn React, check out the [React documentation](https://reactjs.org/).
 
 npm cache clean --force
+
+Side bar
+Display current users
+
+- endpoint that brings back users who signed up
+  Display chat
+- see what firebase offers
+- simple design?
+  - set up subscription
+  - if a user subscribes to a group save their user in a table
+  - when a user sends a chat to that table, it writes to a message table (userid, groupid, message, datetime)
+
+Assign color to users on sign up
