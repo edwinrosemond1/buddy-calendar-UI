@@ -4,11 +4,10 @@ import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "./component.css";
 import EventModal, { Mode } from "../EventModal/index";
-import axios from "axios";
-import { config } from "../../constants";
+
 import { SideBar } from "../SideBar";
 import { useLocation } from "react-router-dom";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs, query, where, addDoc } from "firebase/firestore";
 import { firestore } from "../../firebase-config";
 import UserContext from "../../contexts/UserContext";
 
@@ -21,12 +20,14 @@ export interface CalendarEvent extends Event {
   end: Date;
   author: string;
   id: string;
+  color: string;
 }
 
 interface CalendarProps {}
 
-const CalendarComponent: React.FC<CalendarProps> = ({}) => {
-  const groupId = useLocation().state?.groupId;
+const CalendarComponent: React.FC<CalendarProps> = () => {
+  const { groupId, groupName } = useLocation().state;
+
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [modalMode, setModalMode] = useState<Mode>("add");
   const [isModalOpen, setModalOpen] = useState(false);
@@ -34,41 +35,46 @@ const CalendarComponent: React.FC<CalendarProps> = ({}) => {
   const [eventSubmitted, setEventSubmitted] = useState(false);
 
   const { user } = useContext(UserContext);
-  const groupsRef = collection(firestore, "events"); // Reference to 'groups' collection
+  const eventsRef = collection(firestore, "events"); // Reference to 'groups' collection
 
   useEffect(() => {
-    // axios.get(config.apis.EVENT_LIST).then((response) => {
-    //   console.log("list events", response);
-    //   if (response.data) {
-    //     const transformedEvents = response.data.map((event: CalendarEvent) => ({
-    //       ...event,
-    //       start: new Date(event.start),
-    //       end: new Date(event.end),
-    //     }));
-    //     setEvents([...transformedEvents]);
-    //   }
-    // });
     const getEvents = async () => {
-      let eventsToSet = [];
-      const groupQuery = query(groupsRef, where("groupId", "==", groupId));
-      const querySnapshot = await getDocs(groupQuery);
+      let eventsToSet: CalendarEvent[] = [];
+      const eventQuery = query(
+        eventsRef,
+        where("groupId", "==", groupId ?? "")
+      );
+      const querySnapshot = await getDocs(eventQuery);
       querySnapshot.forEach((event) => {
-        console.log(event.data());
+        console.log("event data", event.data());
         eventsToSet.push({
-          name: event.data().name,
+          start: new Date(event.data().start.toDate()),
+          end: new Date(event.data().end.toDate()),
+          title: event.data().title,
+          description: event.data().description,
+          author: event.data().author,
+          id: event.data().id,
+          color: event.data().color,
         });
       });
+      console.log("events to set", eventsToSet);
+      setEvents(eventsToSet);
     };
+    getEvents();
   }, [eventSubmitted]);
 
   const handleSlotSelection = (slotInfo: any) => {
+    console.log("slot info", slotInfo.id);
     setEventSubmitted(false);
     setFormData({
-      ...formData,
+      title: "",
       start: slotInfo.start, // set the selected date as start date
       end: slotInfo.end,
       groupId,
       author: user?.email,
+      authorUid: user?.uid,
+      id: slotInfo.id,
+      color: user?.color,
     } as CalendarEvent);
     setModalMode("add");
     setModalOpen(true);
@@ -76,14 +82,32 @@ const CalendarComponent: React.FC<CalendarProps> = ({}) => {
 
   const handleEventSubmit = async (eventData: CalendarEvent) => {
     try {
-      await axios.post(config.apis.EVENT_CREATE, {
-        ...eventData,
-      });
+      const eventsCollectionRef = collection(firestore, "events");
+      await addDoc(eventsCollectionRef, eventData);
     } catch (err) {
       console.log("error persisting event", err);
     }
     setModalOpen(false);
     setEventSubmitted(true);
+  };
+
+  // Custom Event component
+  const ColoredEvent = ({ event }: any) => {
+    return (
+      <div style={{ display: "flex", alignItems: "center", padding: "2px" }}>
+        <div
+          style={{
+            width: "12px",
+            height: "12px",
+            borderRadius: "50%",
+            backgroundColor: event.color,
+            border: "2px solid white", // Adding white border
+            marginRight: "5px", // Add some margin to separate from the title
+          }}
+        ></div>
+        {event.title}
+      </div>
+    );
   };
 
   const handleEventClick = (event: CalendarEvent) => {
@@ -100,11 +124,14 @@ const CalendarComponent: React.FC<CalendarProps> = ({}) => {
       <div className="main-content">
         {/* Sidebar */}
         <div className="sidebar">
-          <SideBar />
+          <SideBar groupName={groupName} />
         </div>
         {/* Calendar */}
         <div className="calendar-container">
           <Calendar
+            components={{
+              event: ColoredEvent,
+            }}
             onSelectEvent={handleEventClick}
             localizer={localizer}
             events={events}

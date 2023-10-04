@@ -15,7 +15,7 @@ interface ViewCard {
   groupName: string;
   author: string;
   groupId: string;
-  handleViewCalendar: (groupId: string) => void;
+  handleViewCalendar: (groupId: string, groupName: string) => void;
 }
 
 export const ViewGroupCard: React.FC<ViewCard> = ({
@@ -44,7 +44,10 @@ export const ViewGroupCard: React.FC<ViewCard> = ({
           </Typography>
         </CardContent>
         <CardActions>
-          <Button size="small" onClick={() => handleViewCalendar(groupId)}>
+          <Button
+            size="small"
+            onClick={() => handleViewCalendar(groupId, groupName)}
+          >
             View
           </Button>
         </CardActions>

@@ -26,15 +26,16 @@ export const HomePage: React.FC = () => {
   const groupsRef = collection(firestore, "groups"); // Reference to 'groups' collection
   const navigate = useNavigate();
 
-  const handleViewCalendar = (groupId: string) => {
+  const handleViewCalendar = (groupId: string, groupName: string) => {
     console.log("passing groupid", groupId);
-    navigate("/calendar", { state: groupId });
+    navigate("/calendar", { state: { groupId, groupName } });
   };
 
   const handleCreateGroup = async (groupName: string) => {
     try {
       const groupQuery = query(groupsRef, where("name", "==", groupName));
       const querySnapshot = await getDocs(groupQuery);
+      console.log(" checking for existing query", querySnapshot);
 
       if (querySnapshot.empty) {
         const newGroup = {
@@ -65,7 +66,7 @@ export const HomePage: React.FC = () => {
           groupsToSet.push({
             name: doc.data().name,
             id: doc.data().id,
-            author: doc.data().authorEmail,
+            author: doc.data().author,
           });
         });
         // Logic to fetch user's groups from Firebase.

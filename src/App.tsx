@@ -19,7 +19,6 @@ Modal.setAppElement("#root");
 
 function App() {
   const { user, loading, setLoading } = useContext(UserContext);
-  console.log("user value is now", user);
 
   return (
     <Router>

@@ -12,7 +12,9 @@ const config = {
   appId: "YOUR_APP_ID",
 };
 
-export const app = initializeApp(config);
+export const app = initializeApp(config, {
+  ignoreUndefinedProperties: true,
+});
 export const database = getDatabase(app); // Exporting Realtime Database
 export const auth = getAuth(app);
 export const firestore = getFirestore(app); // Initialize and export Firestore
