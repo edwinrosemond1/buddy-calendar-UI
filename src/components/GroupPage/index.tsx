@@ -1,15 +1,14 @@
 import React, { useContext, useEffect, useState } from "react";
 import "./component.css";
 import UserContext from "../../contexts/UserContext";
-import { GroupCreationCard, ViewGroupCard } from "../Card";
+import { GroupCreationCard, JoinGroupCard, ViewGroupCard } from "../Card";
 import {
   collection,
-  where,
   getDocs,
   query,
   setDoc,
   doc,
-  addDoc,
+  getDoc,
 } from "firebase/firestore";
 import { firestore } from "../../firebase-config";
 import { useNavigate } from "react-router-dom";
@@ -18,39 +17,45 @@ export type Group = {
   name: string;
   id: string;
   author: string;
+  users: string[];
 };
 
 export const HomePage: React.FC = () => {
   const [userGroups, setUserGroups] = useState<Group[]>([]);
+  const [hasCreatedGroup, setHasCreatedGroup] = useState(false);
+  const [hasJoinedGroup, setHasJoinedGroup] = useState(false);
+  const [isJoinLoading, setIsJoinLoading] = useState(false);
   const { user, claims } = useContext(UserContext);
   const groupsRef = collection(firestore, "groups"); // Reference to 'groups' collection
   const navigate = useNavigate();
 
-  const handleViewCalendar = (groupId: string, groupName: string) => {
-    console.log("passing groupid", groupId);
-    navigate("/calendar", { state: { groupId, groupName } });
+  const handleViewCalendar = (
+    groupId: string,
+    groupName: string,
+    users: string[]
+  ) => {
+    navigate("/calendar", { state: { groupId, groupName, users } });
   };
 
-  const handleCreateGroup = async (groupName: string) => {
+  const handleJoinGroup = async (groupId: string) => {
     try {
-      const groupQuery = query(groupsRef, where("name", "==", groupName));
-      const querySnapshot = await getDocs(groupQuery);
-      console.log(" checking for existing query", querySnapshot);
-
-      if (querySnapshot.empty) {
-        const newGroup = {
-          name: groupName,
-          authorEmail: user?.email,
-          authorUid: user?.uid,
-          users: [user?.email],
+      setIsJoinLoading(true);
+      const groupDocRef = doc(firestore, "groups", groupId);
+      const docSnap = await getDoc(groupDocRef);
+      if (docSnap.exists()) {
+        const { users } = docSnap.data();
+        users.push(user?.email);
+        const documentForUpdate: Group = {
+          ...(docSnap.data() as Group),
+          users,
         };
-        await addDoc(groupsRef, newGroup); // Using addDoc to add a new document to the collection
-        console.log("Group created:", newGroup);
-      } else {
-        console.log("Group with this name already exists");
+        setDoc(doc(groupsRef, groupId), documentForUpdate);
+        setHasJoinedGroup(!hasJoinedGroup);
       }
-    } catch (error) {
-      console.error("Error creating group:", error);
+    } catch (err) {
+      console.error("Error Joining", err);
+    } finally {
+      setIsJoinLoading(false);
     }
   };
 
@@ -62,11 +67,13 @@ export const HomePage: React.FC = () => {
         const groupQuery = query(groupsRef);
         const querySnapshot = await getDocs(groupQuery);
         querySnapshot.forEach((doc) => {
-          console.log(doc.data());
           groupsToSet.push({
             name: doc.data().name,
             id: doc.data().id,
             author: doc.data().author,
+            users: doc.data().users.includes(user.email)
+              ? doc.data().users
+              : [],
           });
         });
         // Logic to fetch user's groups from Firebase.
@@ -77,7 +84,7 @@ export const HomePage: React.FC = () => {
 
       fetchGroups();
     }
-  }, [user]);
+  }, [hasCreatedGroup, hasJoinedGroup]);
 
   // const handleRequestAccess = () => {
   //   // Logic for requesting access to a group
@@ -85,16 +92,28 @@ export const HomePage: React.FC = () => {
 
   return (
     <div className="home-container">
-      {userGroups.map((group) => (
-        <ViewGroupCard
-          groupName={group.name}
-          groupId={group.id}
-          author={group.author}
-          handleViewCalendar={handleViewCalendar}
-        />
-      ))}
+      {userGroups.map((group) =>
+        group.users.includes(user?.email as string) ? (
+          <ViewGroupCard
+            groupName={group.name}
+            groupId={group.id}
+            author={group.author}
+            users={group.users}
+            handleViewCalendar={handleViewCalendar}
+          />
+        ) : (
+          <JoinGroupCard
+            groupName={group.name}
+            groupId={group.id}
+            author={group.author}
+            users={group.users}
+            handleJoinCalendar={handleJoinGroup}
+            isJoinLoading={isJoinLoading}
+          />
+        )
+      )}
       {(claims?.admin as Boolean) === true ? (
-        <GroupCreationCard handleCreateGroup={handleCreateGroup} />
+        <GroupCreationCard setHasCreatedGroup={setHasCreatedGroup} />
       ) : (
         <></>
       )}

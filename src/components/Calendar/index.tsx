@@ -4,7 +4,6 @@ import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "./component.css";
 import EventModal, { Mode } from "../EventModal/index";
-
 import { SideBar } from "../SideBar";
 import { useLocation } from "react-router-dom";
 import { collection, getDocs, query, where, addDoc } from "firebase/firestore";
@@ -64,7 +63,6 @@ const CalendarComponent: React.FC<CalendarProps> = () => {
   }, [eventSubmitted]);
 
   const handleSlotSelection = (slotInfo: any) => {
-    console.log("slot info", slotInfo.id);
     setEventSubmitted(false);
     setFormData({
       title: "",
@@ -85,7 +83,7 @@ const CalendarComponent: React.FC<CalendarProps> = () => {
       const eventsCollectionRef = collection(firestore, "events");
       await addDoc(eventsCollectionRef, eventData);
     } catch (err) {
-      console.log("error persisting event", err);
+      console.error("error persisting event", err);
     }
     setModalOpen(false);
     setEventSubmitted(true);
@@ -111,7 +109,6 @@ const CalendarComponent: React.FC<CalendarProps> = () => {
   };
 
   const handleEventClick = (event: CalendarEvent) => {
-    console.log("slot event", event);
     setFormData(event);
     setModalMode("view"); // Setting mode to view
     setModalOpen(true);
