@@ -23,13 +23,11 @@ const Login: React.FC<LoginProps> = ({ setIsLoading }) => {
       .then((userCredential) => {
         // Signed in
         navigate("/");
-        console.log("user", userCredential);
       })
       .catch((error) => {
         const errorMessage = error.message;
         setError(errorMessage);
-      })
-      .finally(() => console.log("finally"));
+      });
   };
 
   return (

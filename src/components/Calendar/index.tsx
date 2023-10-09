@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useMemo } from "react";
 import { Calendar, momentLocalizer, Event } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
@@ -34,7 +34,7 @@ const CalendarComponent: React.FC<CalendarProps> = () => {
   const [eventSubmitted, setEventSubmitted] = useState(false);
 
   const { user } = useContext(UserContext);
-  const eventsRef = collection(firestore, "events"); // Reference to 'groups' collection
+  const eventsRef = useMemo(() => collection(firestore, "events"), []); // Reference to 'groups' collection
 
   useEffect(() => {
     const getEvents = async () => {
@@ -45,7 +45,6 @@ const CalendarComponent: React.FC<CalendarProps> = () => {
       );
       const querySnapshot = await getDocs(eventQuery);
       querySnapshot.forEach((event) => {
-        console.log("event data", event.data());
         eventsToSet.push({
           start: new Date(event.data().start.toDate()),
           end: new Date(event.data().end.toDate()),
@@ -56,11 +55,10 @@ const CalendarComponent: React.FC<CalendarProps> = () => {
           color: event.data().color,
         });
       });
-      console.log("events to set", eventsToSet);
       setEvents(eventsToSet);
     };
     getEvents();
-  }, [eventSubmitted]);
+  }, [eventSubmitted, eventsRef, groupId]);
 
   const handleSlotSelection = (slotInfo: any) => {
     setEventSubmitted(false);

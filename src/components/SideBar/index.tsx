@@ -16,7 +16,6 @@ interface SideBarProps {
 
 export const SideBar: React.FC<SideBarProps> = ({ groupName }) => {
   const { users } = useLocation().state;
-  console.log("users", users, useLocation().state);
 
   return (
     <>

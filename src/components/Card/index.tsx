@@ -177,7 +177,6 @@ export const GroupCreationCard: React.FC<CreateCard> = ({
       } else {
         setGroupNameErrorMessage("Group with this name already exists");
         setInvalidName(true);
-        console.log("Group with this name already exists");
       }
       setIsCreatingLoading(false);
     } catch (error) {

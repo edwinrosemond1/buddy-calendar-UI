@@ -40,7 +40,6 @@ const Signup: React.FC<SignupProps> = () => {
           const userRef = doc(firestore, "users", userCredential.user.uid); // assuming your collection is named 'users'
           await setDoc(userRef, { color });
           navigate("/");
-          console.log("user", userCredential);
           // Signed in
         })
         .catch((error) => {
@@ -49,7 +48,7 @@ const Signup: React.FC<SignupProps> = () => {
         })
         .finally(() => console.log("finally"));
     } catch (err) {
-      console.log("error");
+      console.error("error");
     }
   };
 

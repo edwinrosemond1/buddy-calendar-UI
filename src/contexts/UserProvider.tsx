@@ -1,5 +1,5 @@
 import React, { useState, useEffect, ReactNode } from "react";
-import { onAuthStateChanged, ParsedToken, User } from "firebase/auth";
+import { onAuthStateChanged, ParsedToken } from "firebase/auth";
 import { ref, onValue, off } from "firebase/database";
 import { auth, database, firestore } from "../firebase-config";
 import UserContext, { CalendarUser } from "./UserContext";
@@ -17,7 +17,6 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   useEffect(() => {
     setLoading(true);
     const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
-      console.log("running, setting user");
       setUser(currentUser as CalendarUser);
       setLoading(false);
 
@@ -30,15 +29,11 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       }
 
       if (currentUser) {
-        console.log("currentUser id", currentUser.uid);
         currentUser.getIdTokenResult().then((idTokenResult) => {
-          console.log("token", idTokenResult);
           setClaims(idTokenResult.claims);
         });
         const userRef = doc(firestore, "users", currentUser.uid); // Reference to the user document
-        console.log("getting ref", userRef);
         const userDoc = await getDoc(userRef); // Get the document
-        console.log("user doc", userDoc);
         if (userDoc.exists()) {
           setUser({
             ...currentUser,

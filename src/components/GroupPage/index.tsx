@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import "./component.css";
 import UserContext from "../../contexts/UserContext";
 import { GroupCreationCard, JoinGroupCard, ViewGroupCard } from "../Card";
@@ -26,7 +26,7 @@ export const HomePage: React.FC = () => {
   const [hasJoinedGroup, setHasJoinedGroup] = useState(false);
   const [isJoinLoading, setIsJoinLoading] = useState(false);
   const { user, claims } = useContext(UserContext);
-  const groupsRef = collection(firestore, "groups"); // Reference to 'groups' collection
+  const groupsRef = useMemo(() => collection(firestore, "groups"), []); // Reference to 'groups' collection
   const navigate = useNavigate();
 
   const handleViewCalendar = (
@@ -84,7 +84,7 @@ export const HomePage: React.FC = () => {
 
       fetchGroups();
     }
-  }, [hasCreatedGroup, hasJoinedGroup]);
+  }, [groupsRef, hasCreatedGroup, hasJoinedGroup, user]);
 
   // const handleRequestAccess = () => {
   //   // Logic for requesting access to a group
