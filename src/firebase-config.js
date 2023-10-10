@@ -15,6 +15,7 @@ const config = {
 export const app = initializeApp(config, {
   ignoreUndefinedProperties: true,
 });
+console.log("api key", process.env.REACT_APP_API_KEY);
 export const database = getDatabase(app); // Exporting Realtime Database
 export const auth = getAuth(app);
 export const firestore = getFirestore(app); // Initialize and export Firestore
