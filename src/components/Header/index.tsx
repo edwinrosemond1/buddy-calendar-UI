@@ -35,6 +35,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ setIsLoading }) => {
   const handleLogout = async () => {
     await signOut(auth);
     handleClose();
+    navigate("/login");
   };
 
   return (

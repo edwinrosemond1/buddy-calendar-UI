@@ -1,7 +1,12 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import "./component.css";
 import UserContext from "../../contexts/UserContext";
-import { GroupCreationCard, JoinGroupCard, ViewGroupCard } from "../Card";
+import {
+  GroupCreationCard,
+  JoinGroupCard,
+  LoadingCard,
+  ViewGroupCard,
+} from "../Card";
 import {
   collection,
   getDocs,
@@ -103,7 +108,7 @@ export const HomePage: React.FC = () => {
   return (
     <div className="home-container">
       {isGettingGroups ? (
-        <CircularProgress />
+        <LoadingCard />
       ) : (
         userGroups.map((group) =>
           group.users.includes(user?.email as string) ? (

@@ -17,6 +17,7 @@ import {
 import { firestore } from "../../firebase-config";
 import uuid from "react-uuid";
 import UserContext from "../../contexts/UserContext";
+import "./index.css";
 
 interface CreateCard {
   setHasCreatedGroup: React.Dispatch<React.SetStateAction<boolean>>;
@@ -51,15 +52,7 @@ export const ViewGroupCard: React.FC<ViewCard> = ({
 }) => {
   return (
     <div key={groupName}>
-      <Card
-        sx={{
-          minWidth: 250,
-          minHeight: 250,
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-        }}
-      >
+      <Card className="group-page-card-info">
         <CardContent>
           <Typography sx={{ fontSize: 18 }} color="text.secondary" gutterBottom>
             <span>{groupName} </span>
@@ -91,15 +84,7 @@ export const JoinGroupCard: React.FC<JoinCard> = ({
 }) => {
   return (
     <div key={groupName}>
-      <Card
-        sx={{
-          minWidth: 250,
-          minHeight: 250,
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-        }}
-      >
+      <Card className="group-page-card-info">
         <CardContent>
           <Typography sx={{ fontSize: 18 }} color="text.secondary" gutterBottom>
             <span>{groupName} </span>
@@ -187,16 +172,7 @@ export const GroupCreationCard: React.FC<CreateCard> = ({
   };
 
   return (
-    <Card
-      sx={{
-        minWidth: 250,
-        minHeight: 250,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
+    <Card className="groups-page-card">
       <CardContent>
         {!isCreating ? (
           <>
@@ -241,6 +217,16 @@ export const GroupCreationCard: React.FC<CreateCard> = ({
             </Button>
           </CardActions>
         ))}
+    </Card>
+  );
+};
+
+export const LoadingCard = () => {
+  return (
+    <Card className="groups-page-card">
+      <CardContent>
+        <CircularProgress />
+      </CardContent>
     </Card>
   );
 };

@@ -25,6 +25,7 @@ export const ViewRequests = () => {
         const requestQuery = query(requestsRef);
         const querySnapshot = await getDocs(requestQuery);
         querySnapshot.forEach((doc) => {
+          console.log(doc);
           requestsToSet.push({
             author: doc.data().author,
             status: doc.data().status,

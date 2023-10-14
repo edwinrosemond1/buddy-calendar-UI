@@ -45,35 +45,40 @@ export const RequestCard: React.FC<RequestCardProps> = ({
 }) => {
   const { claims } = useContext(UserContext);
   const setClaimURL = (process.env.REACT_APP_BASE_URL + "/setClaim") as string;
+  console.log(" process", process.env, process.env.REACT_APP_BASE_URL);
   const handleApprove = async () => {
     console.log("running approve");
     try {
       // hit endpoint
+      const body = JSON.stringify({
+        idToken: claims,
+        email: requestingUser?.email,
+      });
+      console.log(body);
       const response = await fetch(setClaimURL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          idToken: claims,
-          email: requestingUser?.email,
-        }),
+        body,
       });
 
       // Handle response
       const responseData = await response.json();
       console.log("success", responseData);
+      if (responseData) {
+        const requestDocRef = doc(firestore, "requests", id);
+        const docSnap = await getDoc(requestDocRef);
+        if (docSnap.exists()) {
+          const requestForUpdate: Request = {
+            ...(docSnap.data() as Request),
+            status: "Approved",
+          };
+          setDoc(doc(requestDocRef, id), requestForUpdate);
+        }
+      }
     } catch (err) {
       console.error("error on setting claim", err);
-    }
-    const requestDocRef = doc(firestore, "requests", id);
-    const docSnap = await getDoc(requestDocRef);
-    if (docSnap.exists()) {
-      const requestForUpdate: Request = {
-        ...(docSnap.data() as Request),
-        status: "Approved",
-      };
-      setDoc(doc(requestDocRef, id), requestForUpdate);
     }
   };
 
@@ -158,7 +163,7 @@ export const RequestAccess: React.FC<RequestAccessProps> = ({ user }) => {
       await setDoc(doc(requestRef, id), newRequest);
       // await addDoc(groupsRef, newGroup); // Using addDoc to add a new document to the collection
     } catch (error) {
-      console.error("Error creating group:", error);
+      console.error("Error creating request:", error);
     } finally {
       setIsSubmitting(false);
     }
