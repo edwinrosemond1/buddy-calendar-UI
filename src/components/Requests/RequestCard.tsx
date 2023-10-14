@@ -46,6 +46,7 @@ export const RequestCard: React.FC<RequestCardProps> = ({
   const { claims } = useContext(UserContext);
   const setClaimURL = (process.env.REACT_APP_BASE_URL + "/setClaim") as string;
   const handleApprove = async () => {
+    console.log("running approve");
     try {
       // hit endpoint
       const response = await fetch(setClaimURL, {
