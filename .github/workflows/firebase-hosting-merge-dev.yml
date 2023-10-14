@@ -12,6 +12,10 @@ jobs:
     environment: Dev
     steps:
       - uses: actions/checkout@v3
+      - name: Debug Env Variables
+        run: |
+          echo "NODE_ENV=$NODE_ENV"
+          echo "REACT_APP_BASE_URL=$REACT_APP_BASE_URL"
       - name: Install Dependencies
         run: npm install
       - name: Build
