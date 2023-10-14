@@ -67,6 +67,9 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ setIsLoading }) => {
           open={Boolean(anchorEl)}
           onClose={handleClose}
         >
+          <MenuItem onClick={() => navigate("/requests")}>
+            View Requests
+          </MenuItem>
           <MenuItem onClick={handleLogout}>Logout</MenuItem>
         </Menu>
       </Toolbar>

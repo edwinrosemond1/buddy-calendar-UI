@@ -189,7 +189,7 @@ export const GroupCreationCard: React.FC<CreateCard> = ({
   return (
     <Card
       sx={{
-        minWidth: 275,
+        minWidth: 250,
         minHeight: 250,
         display: "flex",
         flexDirection: "column",

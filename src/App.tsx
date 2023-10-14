@@ -14,6 +14,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import UserContext from "./contexts/UserContext";
 import { HomePage } from "./components/GroupPage";
 import CalendarComponent from "./components/Calendar/index";
+import { ViewRequests } from "./components/Requests";
 
 Modal.setAppElement("#root");
 
@@ -46,6 +47,7 @@ function App() {
           <Route path="/login" element={<Login setIsLoading={setLoading} />} />
 
           <Route path="/calendar" element={<CalendarComponent />} />
+          <Route path="/requests" element={<ViewRequests />} />
         </Routes>
       )}
     </Router>

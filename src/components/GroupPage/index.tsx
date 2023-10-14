@@ -12,6 +12,8 @@ import {
 } from "firebase/firestore";
 import { firestore } from "../../firebase-config";
 import { useNavigate } from "react-router-dom";
+import { RequestAccess } from "../Requests/RequestCard";
+import { CircularProgress } from "@mui/material";
 
 export type Group = {
   name: string;
@@ -25,8 +27,10 @@ export const HomePage: React.FC = () => {
   const [hasCreatedGroup, setHasCreatedGroup] = useState(false);
   const [hasJoinedGroup, setHasJoinedGroup] = useState(false);
   const [isJoinLoading, setIsJoinLoading] = useState(false);
+  const [isGettingGroups, setIsGettingGroups] = useState(false);
   const { user, claims } = useContext(UserContext);
   const groupsRef = useMemo(() => collection(firestore, "groups"), []); // Reference to 'groups' collection
+
   const navigate = useNavigate();
 
   const handleViewCalendar = (
@@ -63,23 +67,29 @@ export const HomePage: React.FC = () => {
     if (user) {
       // Fetch groups from Firebase
       const fetchGroups = async () => {
+        setIsGettingGroups(true);
         let groupsToSet: Group[] = [];
-        const groupQuery = query(groupsRef);
-        const querySnapshot = await getDocs(groupQuery);
-        querySnapshot.forEach((doc) => {
-          groupsToSet.push({
-            name: doc.data().name,
-            id: doc.data().id,
-            author: doc.data().author,
-            users: doc.data().users.includes(user.email)
-              ? doc.data().users
-              : [],
+        try {
+          const groupQuery = query(groupsRef);
+          const querySnapshot = await getDocs(groupQuery);
+          querySnapshot.forEach((doc) => {
+            groupsToSet.push({
+              name: doc.data().name,
+              id: doc.data().id,
+              author: doc.data().author,
+              users: doc.data().users.includes(user.email)
+                ? doc.data().users
+                : [],
+            });
           });
-        });
+          setUserGroups(groupsToSet);
+        } catch (err) {
+        } finally {
+          setIsGettingGroups(false);
+        }
+
         // Logic to fetch user's groups from Firebase.
         // Replace the below dummy data with Firebase fetching logic
-
-        setUserGroups(groupsToSet);
       };
 
       fetchGroups();
@@ -92,31 +102,37 @@ export const HomePage: React.FC = () => {
 
   return (
     <div className="home-container">
-      {userGroups.map((group) =>
-        group.users.includes(user?.email as string) ? (
-          <ViewGroupCard
-            groupName={group.name}
-            groupId={group.id}
-            author={group.author}
-            users={group.users}
-            handleViewCalendar={handleViewCalendar}
-          />
-        ) : (
-          <JoinGroupCard
-            groupName={group.name}
-            groupId={group.id}
-            author={group.author}
-            users={group.users}
-            handleJoinCalendar={handleJoinGroup}
-            isJoinLoading={isJoinLoading}
-          />
+      {isGettingGroups ? (
+        <CircularProgress />
+      ) : (
+        userGroups.map((group) =>
+          group.users.includes(user?.email as string) ? (
+            <ViewGroupCard
+              groupName={group.name}
+              groupId={group.id}
+              author={group.author}
+              users={group.users}
+              handleViewCalendar={handleViewCalendar}
+            />
+          ) : (
+            <JoinGroupCard
+              groupName={group.name}
+              groupId={group.id}
+              author={group.author}
+              users={group.users}
+              handleJoinCalendar={handleJoinGroup}
+              isJoinLoading={isJoinLoading}
+            />
+          )
         )
       )}
+
       {(claims?.admin as Boolean) === true ? (
         <GroupCreationCard setHasCreatedGroup={setHasCreatedGroup} />
       ) : (
         <></>
       )}
+      <RequestAccess user={user} />
     </div>
   );
 };
