@@ -12,16 +12,17 @@ jobs:
     environment: Dev
     steps:
       - uses: actions/checkout@v3
+      - name: Install Dependencies
+        run: npm install
+      - name: Build
+        run: npm run build:dev
+        env: # Set the environment variable for this step
+          CI: false
+          REACT_APP_BASE_URL: ${{ vars.BASE_URL }}
       - name: Debug Env Variables
         run: |
           echo "NODE_ENV=$NODE_ENV"
           echo "REACT_APP_BASE_URL=$REACT_APP_BASE_URL"
-      - name: Install Dependencies
-        run: npm install
-      - name: Build
-        run: npm run build
-        env: # Set the environment variable for this step
-          REACT_APP_BASE_URL: ${{ vars.BASE_URL }}
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: "${{ secrets.GITHUB_TOKEN }}"

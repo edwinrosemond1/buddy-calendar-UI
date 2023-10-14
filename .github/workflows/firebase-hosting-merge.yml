@@ -18,6 +18,8 @@ jobs:
         run: |
           echo "NODE_ENV=$NODE_ENV"
           echo "REACT_APP_BASE_URL=$REACT_APP_BASE_URL"
+      - name: Debug .env
+        run: cat .env
       - name: Build
         run: npm run build
         env: # Set the environment variable for this step
