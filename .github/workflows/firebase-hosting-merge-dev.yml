@@ -26,7 +26,7 @@ jobs:
       - name: Debug Env Variables
         run: |
           echo "NODE_ENV=$NODE_ENV"
-          echo "REACT_APP_BASE_URL=$REACT_APP_BASE_URL"
+          echo "BASE_URL=$BASE_URL"
       - name: Debug .env
         run: cat .env
       - uses: FirebaseExtended/action-hosting-deploy@v0
