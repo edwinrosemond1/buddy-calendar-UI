@@ -16,7 +16,7 @@ jobs:
         run: npm install
       - name: Build
         run: |
-          export NODE_ENV=development
+          echo "NODE_ENV=development" >> $GITHUB_ENV
           echo "NODE_ENV: $NODE_ENV"
           npm run build:dev
         env: # Set the environment variable for this step
