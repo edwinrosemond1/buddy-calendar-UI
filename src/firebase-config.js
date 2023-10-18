@@ -21,6 +21,7 @@ console.log(
   process.env.projectId,
   process.env
 );
+console.log("react base url", process.env.REACT_APP_BASE_URL);
 export const database = getDatabase(app); // Exporting Realtime Database
 export const auth = getAuth(app);
 export const firestore = getFirestore(app); // Initialize and export Firestore
