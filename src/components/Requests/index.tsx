@@ -1,4 +1,4 @@
-import { collection, getDocs, query } from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { firestore } from "../../firebase-config";
 import UserContext from "../../contexts/UserContext";
@@ -17,12 +17,16 @@ export const ViewRequests = () => {
   const requestsRef = useMemo(() => collection(firestore, "requests"), []); // Reference to 'groups' collection
   const { user } = useContext(UserContext);
   const [pendingRequests, setPendingRequests] = useState<Request[]>([]);
+  const [refresh, setRefresh] = useState(true);
   useEffect(() => {
     if (user) {
       // Fetch groups from Firebase
       const fetchRequests = async () => {
         let requestsToSet: Request[] = [];
-        const requestQuery = query(requestsRef);
+        const requestQuery = query(
+          requestsRef,
+          where("status", "==", "Pending")
+        );
         const querySnapshot = await getDocs(requestQuery);
         querySnapshot.forEach((doc) => {
           console.log(doc);
@@ -42,7 +46,7 @@ export const ViewRequests = () => {
 
       fetchRequests();
     }
-  }, [requestsRef, user]);
+  }, [requestsRef, user, refresh]);
   return (
     <div className="home-container">
       {pendingRequests.map((request) => (
@@ -53,6 +57,8 @@ export const ViewRequests = () => {
           permission={request.permission}
           requestingUser={user}
           id={request.id}
+          refresh={refresh}
+          setRefresh={setRefresh}
         />
       ))}
     </div>

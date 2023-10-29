@@ -1,4 +1,4 @@
-import { ParsedToken, User } from "firebase/auth";
+import { IdTokenResult, ParsedToken, User } from "firebase/auth";
 import { createContext } from "react";
 
 export interface CalendarUser extends User {
@@ -9,6 +9,7 @@ export type UserContextType = {
   loading: boolean;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   claims: ParsedToken | undefined;
+  token: string;
 };
 
 const UserContext = createContext<UserContextType>({
@@ -16,6 +17,7 @@ const UserContext = createContext<UserContextType>({
   loading: false,
   setLoading: () => {},
   claims: undefined,
+  token: "",
 });
 
 export default UserContext;

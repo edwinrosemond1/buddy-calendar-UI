@@ -1,5 +1,5 @@
 import React, { useState, useEffect, ReactNode } from "react";
-import { onAuthStateChanged, ParsedToken } from "firebase/auth";
+import { IdTokenResult, onAuthStateChanged, ParsedToken } from "firebase/auth";
 import { ref, onValue, off } from "firebase/database";
 import { auth, database, firestore } from "../firebase-config";
 import UserContext, { CalendarUser } from "./UserContext";
@@ -13,6 +13,7 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [user, setUser] = useState<CalendarUser | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(true);
   const [claims, setClaims] = useState<ParsedToken | undefined>(undefined);
+  const [token, setToken] = useState<string>("");
 
   useEffect(() => {
     setLoading(true);
@@ -29,8 +30,9 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       }
 
       if (currentUser) {
-        currentUser.getIdTokenResult().then((idTokenResult) => {
+        currentUser.getIdTokenResult(true).then((idTokenResult) => {
           setClaims(idTokenResult.claims);
+          setToken(idTokenResult.token);
         });
         const userRef = doc(firestore, "users", currentUser.uid); // Reference to the user document
         const userDoc = await getDoc(userRef); // Get the document
@@ -50,6 +52,7 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
           console.log("claims change");
           currentUser.getIdTokenResult(true).then((idTokenResult) => {
             setClaims(idTokenResult.claims);
+            setToken(idTokenResult.token);
           });
         };
 
@@ -65,7 +68,7 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, claims, loading, setLoading }}>
+    <UserContext.Provider value={{ user, claims, loading, setLoading, token }}>
       {children}
     </UserContext.Provider>
   );

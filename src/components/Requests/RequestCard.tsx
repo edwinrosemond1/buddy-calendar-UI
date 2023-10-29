@@ -25,6 +25,7 @@ import uuid from "react-uuid";
 import { firestore } from "../../firebase-config";
 import UserContext, { CalendarUser } from "../../contexts/UserContext";
 import { Request } from "./index";
+import { CLOUD_FUNCTION_DOMAIN } from "../../env/env-var";
 
 interface RequestCardProps {
   author: string;
@@ -33,6 +34,8 @@ interface RequestCardProps {
   status: string;
   requestingUser: CalendarUser | undefined;
   id: string;
+  refresh?: boolean;
+  setRefresh?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const RequestCard: React.FC<RequestCardProps> = ({
@@ -42,23 +45,30 @@ export const RequestCard: React.FC<RequestCardProps> = ({
   status,
   requestingUser,
   id,
+  setRefresh,
+  refresh,
 }) => {
-  const { claims } = useContext(UserContext);
-  const setClaimURL = (process.env.REACT_APP_BASE_URL + "/setClaim") as string;
-  console.log(" process", process.env, process.env.REACT_APP_BASE_URL);
+  const { token } = useContext(UserContext);
+  console.log(token);
+  const enableAdminURL = (CLOUD_FUNCTION_DOMAIN + "/enableAdmin") as string;
+  const [isApproving, setIsApproving] = useState(false);
+  useEffect(() => {}, [isApproving]);
+
   const handleApprove = async () => {
     console.log("running approve");
+    setIsApproving(true);
     try {
       // hit endpoint
       const body = JSON.stringify({
-        idToken: claims,
         email: requestingUser?.email,
       });
       console.log(body);
-      const response = await fetch(setClaimURL, {
+      const response = await fetch(enableAdminURL, {
         method: "POST",
+        mode: "cors",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
         },
         body,
       });
@@ -69,16 +79,20 @@ export const RequestCard: React.FC<RequestCardProps> = ({
       if (responseData) {
         const requestDocRef = doc(firestore, "requests", id);
         const docSnap = await getDoc(requestDocRef);
+        console.log("docSnap", docSnap);
         if (docSnap.exists()) {
           const requestForUpdate: Request = {
             ...(docSnap.data() as Request),
             status: "Approved",
           };
-          setDoc(doc(requestDocRef, id), requestForUpdate);
+          setDoc(requestDocRef, requestForUpdate);
         }
       }
     } catch (err) {
       console.error("error on setting claim", err);
+    } finally {
+      setIsApproving(false);
+      setRefresh!(!refresh);
     }
   };
 
@@ -109,13 +123,29 @@ export const RequestCard: React.FC<RequestCardProps> = ({
         ))}
       </CardContent>
       <CardActions>
-        <Button
-          size="small"
-          variant="contained"
-          onClick={() => handleApprove()}
-        >
-          Approve
-        </Button>
+        <div style={{ position: "relative", display: "inline-block" }}>
+          <Button
+            size="small"
+            variant="contained"
+            onClick={() => handleApprove()}
+            disabled={isApproving}
+          >
+            Approve
+          </Button>
+
+          {isApproving && (
+            <CircularProgress
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                marginTop: "-12px",
+                marginLeft: "-12px",
+              }}
+              size={24}
+            />
+          )}
+        </div>
         <Button size="small">{dateTime.toLocaleDateString()}</Button>
       </CardActions>
     </Card>
